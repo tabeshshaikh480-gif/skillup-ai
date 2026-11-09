@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillUp AI - Personal Teacher</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Arial,sans-serif;
+ background:#0b1020;color:white;
+}
+header{
+ padding:20px;background:#151d35;
+ display:flex;justify-content:space-between;
+ align-items:center;
+}
+.logo{font-size:23px;font-weight:bold;color:#a78bfa}
+main{max-width:850px;margin:auto;padding:18px}
+.card{
+ background:#151d35;padding:18px;
+ border-radius:16px;margin-bottom:16px;
+ border:1px solid #303b5b;
+}
+select,input,button{
+ padding:13px;border-radius:10px;
+ border:0;font-size:15px;
+}
+select{background:#26314d;color:white;width:100%}
+#chat{
+ height:300px;overflow-y:auto;
+ padding:12px;background:#0e1529;
+ border-radius:12px;margin:15px 0;
+}
+.msg{padding:12px;margin:9px 0;border-radius:12px;
+ line-height:1.6;white-space:pre-wrap}
+.user{background:#48318c;margin-left:35px}
+.teacher{background:#263650;margin-right:25px}
+.controls{display:flex;gap:8px}
+.controls input{flex:1;min-width:0}
+button{
+ background:#8055e8;color:white;
+ cursor:pointer;font-weight:bold;
+}
+button:active{opacity:.7}
+.small{font-size:13px;color:#aebbd3}
+.option{
+ display:block;width:100%;text-align:left;
+ background:#263650;margin:9px 0;
+}
+#feedback{margin-top:12px;color:#a78bfa}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">✦ SkillUp AI</div>
+ <span>Personal Teacher</span>
+</header>
+
+<main>
+
+<div class="card">
+ <h2>Welcome, Student 👋</h2>
+ <p class="small">Your AI professor is ready to teach you.</p>
+ <label>Select your language</label>
+ <select id="language">
+  <option value="en-IN">English</option>
+  <option value="hi-IN">हिन्दी (Hindi)</option>
+  <option value="mr-IN">मराठी (Marathi)</option>
+  <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+  <option value="bn-IN">বাংলা (Bengali)</option>
+  <option value="ta-IN">தமிழ் (Tamil)</option>
+  <option value="te-IN">తెలుగు (Telugu)</option>
+  <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+  <option value="ml-IN">മലയാളം (Malayalam)</option>
+  <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+  <option value="ur-IN">اردو (Urdu)</option>
+ </select>
+</div>
+
+<div class="card">
+ <h3>🎓 Ask Your Professor</h3>
+ <div id="chat">
+  <div class="msg teacher">
+   Welcome to SkillUp AI. I am your personal professor.
+
+   What would you like to learn today?
+  </div>
+ </div>
+
+ <div class="controls">
+  <input id="question" placeholder="Ask your question...">
+  <button onclick="sendMessage()">Send</button>
+ </div>
+ <br>
+ <div class="controls">
+  <button onclick="startVoice()">🎤 Speak</button>
+  <button onclick="stopVoice()">Stop listening</button>
+ </div>
+ <p class="small" id="status">Demo teacher — AI connection coming next.</p>
+</div>
+
+<div class="card">
+ <h3>🔊 Professor Voice</h3>
+ <p class="small">Read the latest professor lesson aloud.</p>
+ <button onclick="speakLast()">▶ Listen to lesson</button>
+ <button onclick="speechSynthesis.cancel()">Stop voice</button>
+</div>
+
+<div class="card">
+ <h3>📝 Knowledge Test</h3>
+ <p>Which language is commonly used to build interactive websites?</p>
+ <button class="option" onclick="answer(false)">A. HTML</button>
+ <button class="option" onclick="answer(true)">B. JavaScript</button>
+ <button class="option" onclick="answer(false)">C. CSS</button>
+ <div id="feedback"></div>
+</div>
+
+</main>
+
+<script>
+let lastLesson = "Welcome to SkillUp AI.";
+let recognition;
+
+function addMessage(text,type){
+ const chat=document.getElementById("chat");
+ const div=document.createElement("div");
+ div.className="msg "+type;
+ div.textContent=text;
+ chat.appendChild(div);
+ chat.scrollTop=chat.scrollHeight;
+}
+
+function sendMessage(){
+ const input=document.getElementById("question");
+ const q=input.value.trim();
+ if(!q)return;
+
+ addMessage(q,"user");
+ input.value="";
+
+ const lang=document.getElementById("language").value;
+
+ let reply = "Excellent question. Let's understand this step by step. " +
+ "Please note: I am currently running in demonstration mode. " +
+ "We will connect the real AI professor in our next development step.";
+
+ if(lang==="hi-IN"){
+ reply="बहुत अच्छा सवाल! इसे हम आसान भाषा में समझेंगे। " +
+ "अभी यह डेमो मोड है। अगले चरण में असली AI शिक्षक जोड़ेंगे।";
+ }
+ if(lang==="mr-IN"){
+ reply="खूप छान प्रश्न! आपण हे सोप्या पद्धतीने समजून घेऊ. " +
+ "सध्या हे डेमो मोड आहे. पुढील टप्प्यात खरा AI शिक्षक जोडू.";
+ }
+
+ lastLesson=reply;
+ setTimeout(()=>addMessage(reply,"teacher"),400);
+}
+
+function speakLast(){
+ if(!("speechSynthesis" in window)){
+ alert("Voice is not supported in this browser.");
+ return;
+ }
+ speechSynthesis.cancel();
+ const speech=new SpeechSynthesisUtterance(lastLesson);
+ speech.lang=document.getElementById("language").value;
+ speechSynthesis.speak(speech);
+}
+
+function startVoice(){
+ const SR=window.SpeechRecognition ||
+          window.webkitSpeechRecognition;
+ if(!SR){
+ alert("Voice input is not supported. Try Chrome.");
+ return;
+ }
+ recognition=new SR();
+ recognition.lang=document.getElementById("language").value;
+ recognition.onresult=(e)=>{
+  document.getElementById("question").value=
+   e.results[0][0].transcript;
+ };
+ recognition.onerror=()=>{
+  document.getElementById("status").textContent=
+   "Voice input unavailable. Please type your question.";
+ };
+ recognition.start();
+ document.getElementById("status").textContent=
+  "Listening... Speak now.";
+}
+
+function stopVoice(){
+ if(recognition)recognition.stop();
+ document.getElementById("status").textContent="Stopped listening.";
+}
+
+function answer(correct){
+ const feedback=document.getElementById("feedback");
+ if(correct){
+ feedback.textContent="Correct! Excellent work. 🎉";
+ }else{
+ feedback.textContent="Not quite. Hint: JavaScript controls interactive behaviour.";
+ }
+}
+</script>
+
+</body>
+</html>
